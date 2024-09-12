@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="int-inventory-management-suite.xml" />
+	<global-property doc:name="Global Property" doc:id="fb0265e8-efe5-45ec-9d09-d7fca87254ce" name="muleEnv" value="local" />
+	<global-property doc:name="Global Property" doc:id="163f83b8-68a0-4258-91a1-ceb3c3a87ebc" name="muleApplicationName" value="int-inventory-management-${muleEnv}" />
+	<munit:test name="processing-flow-test" doc:id="ec49e8db-5e55-4b0d-ac31-cba5bdd32bd8" >
+		<munit:behavior >
+			<munit-tools:spy doc:name="Spy Transform To JSON" doc:id="70435bb9-e633-40f9-9952-5741e8a97353" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="4f10e36a-7840-48d9-903e-3d401ff223b8" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="c4526e51-b76a-4084-b566-abf218b1c3b5" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import processingflowtest::spy_assert_payload
+---
+spy_assert_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit:set-event doc:name="Set Input" doc:id="e016b367-0fa7-4bb8-b26b-5b858d8e8f7f" >
+				<munit:payload value="#[output text/csv --- readUrl('classpath://processingflowtest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="text/csv" />
+				<munit:attributes value="#[readUrl('classpath://processingflowtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to processing-flow" doc:id="04817525-7c4e-4749-8fcc-e6cd7cb3056a" name="processing-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="9dedd7a1-423f-4c79-adcf-3843f9857f87" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import processingflowtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Transform To JSON" doc:id="97bc9b34-25e1-4f3a-b645-59debde3b3b6" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="4f10e36a-7840-48d9-903e-3d401ff223b8" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="real-scenario-flow-test" doc:id="0b142d8f-8917-45d3-99c8-ac68aec0e133" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Move Once is Processed" doc:id="47edc27c-6b84-44ee-9ddb-28d8549102b2" processor="sftp:move">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="2d6cb04f-e4c9-4c33-b95d-849778a216de" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://realscenarioflowtest\mock_payload.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://realscenarioflowtest\mock_attributes.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="batchResponse" value="#[readUrl('classpath://realscenarioflowtest\mock_variable_.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock processing-flow" doc:id="6de9033d-256a-4064-aebd-8ccb3c70479d" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="b0e1e53a-8c18-45f9-93a9-8511f222c21e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://realscenarioflowtest\mock_payload1.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://realscenarioflowtest\mock_attributes1.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="batchResponse" value="#[readUrl('classpath://realscenarioflowtest\mock_variable_1.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Get File from SFTP Server" doc:id="83511219-f1a0-4a36-9bb5-ee8e0e944b31" processor="sftp:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="36cc4c46-ccef-4027-b68c-265b9e9e75b7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output text/csv --- readUrl('classpath://realscenarioflowtest\mock_payload2.dwl')]" mediaType="text/csv" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://realscenarioflowtest\mock_attributes2.dwl')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="1e094e1e-36d2-4d04-aaf2-7220315e2f70" >
+				<munit:payload value="#[readUrl('classpath://realscenarioflowtest\set-event_payload.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to real-scenario-flow" doc:id="50aab91c-aefe-4142-bec8-302d7c7ec634" name="real-scenario-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="04b6a60a-3b7a-4177-95ab-db2751af71f3" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import realscenarioflowtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify PROCESS FOR THE INVENTORY FILE WAS FINISHED" doc:id="b83fac5e-6d08-44f7-b026-620a1d52f252" processor="json-logger:logger" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a09bae31-e82a-4d46-a6cf-2a496193d0b7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify START PROCESS TO FIXED INVENTORY FILE" doc:id="5fb894c7-569e-48d4-8b1e-982f797add16" processor="json-logger:logger" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="f8b9a312-2568-4fb8-b2bb-792efd22b08b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	
+	<!-- [STUDIO:"real-scenario-flow-test-error-scenario"]<munit:test name="real-scenario-flow-test-error-scenario" doc:id="48234b0d-e530-4d9f-aa0b-d8eacc0ea51f" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get File from SFTP Server" doc:id="aa7e79d3-633b-4dbf-8ded-f64920fd24e5" processor="sftp:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="36cc4c46-ccef-4027-b68c-265b9e9e75b7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SFTP:ILLEGAL_PATH" />
+					<munit-tools:attributes value="#[readUrl('classpath://realscenarioflowtest\mock_attributes2.dwl')&#93;" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="164c11f7-9ff6-4360-a732-8635eefa3ab4" >
+				<munit:payload value="#[readUrl('classpath://realscenarioflowtest\set-event_payload.dwl')&#93;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to real-scenario-flow" doc:id="a43ba48f-9583-4422-8d1f-3df425715330" name="real-scenario-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify Parte Template Error" doc:id="d92c5d93-b0e7-406e-8162-dcca5a27bd9c" processor="parse-template" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Parse Template - Error" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6d46b40e-b6dd-449c-b54a-a761420487af" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test> [STUDIO] -->
+
+
+</mule>

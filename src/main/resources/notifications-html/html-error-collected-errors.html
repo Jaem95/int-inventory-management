@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERROR Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #d9534f;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+        }
+        .img-header {
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .img-header img {
+            max-width: 100%;
+            height: auto;
+        }
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            color: #555555;
+            text-align: center;
+            padding: 10px;
+            border-radius: 0 0 5px 5px;
+        }
+        .image {
+            margin: 20px 0;
+        }
+        .error-details {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+            text-align: left;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 20px 0;
+            background-color: #5bc0de;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+     <div class="img-header">
+                        <img src="https://www.salesforce.com/news/wp-content/uploads/sites/3/2023/06/Mulesoft-Default.jpg" alt="Mulesoft">
+                    
+        
+        </div>
+        <div class="header">                   
+        
+            <h1>ERROR Notification</h1>
+        </div>
+        <div class="content">
+            <p>Dear User,</p>
+            <p>An error has occurred in the system. Please find the details below:</p>
+            <div class="error-details">
+                <p><strong>Mulesoft Application:</strong> #[Mule::p('muleApplicationName')] </p>
+                <!--<p><strong>Error Code:</strong> #[vars.datadogMetricData.message.errorType default error.errorType.asString  ] </p> -->
+                <p><strong>Error Message:</strong> The following records do not meet the field requirements or have missing fields. </p>
+                <p><strong>Timestamp:</strong> #[now()]</p>
+                <p><strong>Correlation Id:</strong> #[correlationId]</p>
+                <p><strong>Additional Information:</strong> #[payload]</p>
+            </div>
+            <p>If you need further assistance, please contact our support team.</p>
+            <a href="mailto:jose.escobar.macias@hotmail.com" class="button">Contact Support</a>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 JAEM. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

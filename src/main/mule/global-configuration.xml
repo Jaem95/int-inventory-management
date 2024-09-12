@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<configuration-properties
+		doc:name="Configuration properties"
+		doc:id="b6ef8a34-041e-4df8-8590-42ad4a87c896"
+		file="properties/${muleEnv}.yaml" />
+	<global-property doc:name="Global Property"
+		doc:id="c31133ae-f486-40e4-b2e6-919b5d099a34"
+		name="muleApplicationName" value="int-inventory-management-${muleEnv}" />
+	<json-logger:config name="JSON_Logger_Config"
+		doc:name="JSON Logger Config"
+		doc:id="5b245091-c86c-46ca-b684-dc9aa9c61123" environment="${muleEnv}"
+		prettyPrint="false"
+		applicationName="#[Mule::p('muleApplicationName')]"
+		applicationVersion="1.0.0" />
+	<secure-properties:config
+		name="Secure_Properties_Config" doc:name="Secure Properties Config"
+		doc:id="13f98efd-a716-4f8f-b3b8-5ef471d7f967"
+		file="properties/secure-${muleEnv}.properties" key="${muleKey}">
+		<secure-properties:encrypt
+			algorithm="Blowfish" />
+	</secure-properties:config>
+	<global-property doc:name="Global Property"
+		doc:id="3e1f44e7-0acf-4839-941e-3af186790b18" name="muleKey"
+		value="Mul3T3st" />
+	<sftp:config name="SFTP_Config" doc:name="SFTP Config"
+		doc:id="9d255136-3a42-4927-9932-1b57aeb67432">
+		<sftp:connection
+			host="${sftp.host}"
+			username="${sftp.user}"
+			password="${secure::sftp.password}" workingDir="${sftp.working-directory}"
+			connectionTimeoutUnit="MINUTES" responseTimeoutUnit="MINUTES" port="${sftp.port}"/>
+	</sftp:config>
+	<email:smtp-config name="Email_SMTP"
+		doc:name="Email SMTP" doc:id="552c4dbb-d38e-48f9-9fb8-98ecb47ac685">
+		<email:smtp-connection host="${smtp.host}"
+			user="${smtp.user}" password="${secure::smtp.password}" port="${smtp.port}">
+		</email:smtp-connection>
+	</email:smtp-config>
+	<configuration doc:name="Configuration"
+		doc:id="0e99b181-598d-4f72-ba3d-bb6dd83fedb0"
+		defaultErrorHandler-ref="global-configurationError_Handler" />
+	<global-property doc:name="Global Property"
+		doc:id="124c66db-ae57-4734-9b84-7dd0f952419c" name="muleEnv"
+		value="local" />
+	<error-handler name="global-configurationError_Handler"
+		doc:id="a263a0f1-ed49-4c6e-9a1d-c0d932f3292b">
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="4900a8ef-a00e-4c14-9c92-d2c9589e5671" type="ANY">
+			<parse-template doc:name="Parse Template - Error"
+				doc:id="e12b870b-ebb6-465e-b784-5f03ca76fb6a"
+				location="notifications-html/html-error.html" target="emailHtml">
+			</parse-template>
+			<email:send doc:name="Send ERROR Email"
+				doc:id="2df4f6ff-41e2-40c2-b2b2-0995f963c4ff"
+				fromAddress="#[Mule::p('smtp.fromEmail')]"
+				subject="#[Mule::p('smtp.errorSubject') replace &quot;[muleApp]&quot; with upper(Mule::p('muleApplicationName'))]"
+				toAddresses="#[Mule::p('smtp.toEmail') splitBy &quot;,&quot;]"
+				config-ref="Email_SMTP">
+				<email:body contentType='#["text/html"]'>
+					<email:content><![CDATA[#[(vars.emailHtml default error.detailedDescription  ) default ""]]]></email:content>
+				</email:body>
+			</email:send>
+		</on-error-propagate>
+	</error-handler>
+</mule>
