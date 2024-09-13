@@ -32,9 +32,10 @@ http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/
 			</scheduling-strategy>
 		</scheduler>
 		<json-logger:logger
-			doc:name="START PROCESS TO FIXED INVENTORY FILE"
+			doc:name="PROCESS STARTED FOR  INVENTORY FILE"
 			doc:id="f8b9a312-2568-4fb8-b2bb-792efd22b08b"
-			message="START PROCESS TO FIXED INVENTORY FILE" config-ref="JSON_Logger_Config">
+			message="PROCESS STARTED FOR  INVENTORY FILE" config-ref="JSON_Logger_Config">
+			<json-logger:content ><![CDATA[#[""]]]></json-logger:content>
 		</json-logger:logger>
 		<sftp:read doc:name="Get File from SFTP Server"
 			doc:id="36cc4c46-ccef-4027-b68c-265b9e9e75b7"
@@ -47,10 +48,11 @@ http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/
 			targetPath="${inventory-syncronization.processed-files-path}"
 			renameTo='#[correlationId ++ "-" ++ attributes.fileName]' config-ref="SFTP_Config"/>
 		<json-logger:logger
-			doc:name="THE FILE HAS ENTERED TO THE BATH PROCESS..... IN THIS MOMENT IS BEING PROCESSED"
+			doc:name="THE FILE HAS ENTERED TO THE BACTH PROCESS..... IN THIS MOMENT IS BEING PROCESSED"
 			doc:id="a09bae31-e82a-4d46-a6cf-2a496193d0b7"
-			message="THE FILE HAS ENTERED TO THE BATH PROCESS..... IN THIS MOMENT IS BEING PROCESSED"
+			message="THE FILE HAS ENTERED TO THE BACTH  PROCESS..... IN THIS MOMENT IS BEING PROCESSED"
 			tracePoint="FLOW" config-ref="JSON_Logger_Config">
+			<json-logger:content ><![CDATA[#[""]]]></json-logger:content>
 		</json-logger:logger>
 		<error-handler>
 			<on-error-propagate enableNotifications="true"

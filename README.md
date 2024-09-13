@@ -1,4 +1,4 @@
-# Inventory Management Batch Processing MuleSoft Application
+# Inventories Management Batch Processing MuleSoft Application
 
 This MuleSoft application processes inventory files and manages data synchronization between systems. It handles input CSV files, transforms them to JSON, validates records, and performs batch processing to manage inventory data.
 
