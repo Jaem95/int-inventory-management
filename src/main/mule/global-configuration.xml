@@ -62,7 +62,4 @@ http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/
 	<configuration doc:name="Configuration"
 		doc:id="0e99b181-598d-4f72-ba3d-bb6dd83fedb0"
 		defaultErrorHandler-ref="global-configurationError_Handler" />
-	<global-property doc:name="Global Property"
-		doc:id="124c66db-ae57-4734-9b84-7dd0f952419c" name="muleEnv"
-		value="local" />
 </mule>
