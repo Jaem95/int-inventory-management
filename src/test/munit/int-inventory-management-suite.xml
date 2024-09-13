@@ -9,7 +9,7 @@
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
 	<munit:config name="int-inventory-management-suite.xml" />
 	<global-property doc:name="Global Property" doc:id="fb0265e8-efe5-45ec-9d09-d7fca87254ce" name="muleEnv" value="local" />
-	<global-property doc:name="Global Property" doc:id="163f83b8-68a0-4258-91a1-ceb3c3a87ebc" name="muleApplicationName" value="int-inventory-management-${muleEnv}" />
+	<global-property doc:name="Global Property" doc:id="163f83b8-68a0-4258-91a1-ceb3c3a87ebc" name="muleApplicationName" value="int-inventories-management-${muleEnv}" />
 	<munit:test name="processing-flow-test" doc:id="ec49e8db-5e55-4b0d-ac31-cba5bdd32bd8" >
 		<munit:behavior >
 			<!-- [STUDIO:"Spy Transform To JSON"]<munit-tools:spy doc:name="Spy Transform To JSON" doc:id="70435bb9-e633-40f9-9952-5741e8a97353" processor="ee:transform">

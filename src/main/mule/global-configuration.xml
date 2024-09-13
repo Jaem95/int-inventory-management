@@ -20,7 +20,7 @@ http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/
 		file="properties/${muleEnv}.yaml" />
 	<global-property doc:name="Global Property"
 		doc:id="c31133ae-f486-40e4-b2e6-919b5d099a34"
-		name="muleApplicationName" value="int-inventory-management-${muleEnv}" />
+		name="muleApplicationName" value="int-inventories-management-${muleEnv}" />
 	<json-logger:config name="JSON_Logger_Config"
 		doc:name="JSON Logger Config"
 		doc:id="5b245091-c86c-46ca-b684-dc9aa9c61123" environment="${muleEnv}"
