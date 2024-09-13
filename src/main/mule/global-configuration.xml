@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
 	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
 	xmlns:email="http://www.mulesoft.org/schema/mule/email"
 	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp"
@@ -12,7 +12,8 @@
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
 http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
-http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
 	<configuration-properties
 		doc:name="Configuration properties"
 		doc:id="b6ef8a34-041e-4df8-8590-42ad4a87c896"
@@ -33,21 +34,29 @@ http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/m
 		<secure-properties:encrypt
 			algorithm="Blowfish" />
 	</secure-properties:config>
-	<global-property doc:name="Global Property"
-		doc:id="3e1f44e7-0acf-4839-941e-3af186790b18" name="muleKey"
-		value="Mul3T3st" />
 	<sftp:config name="SFTP_Config" doc:name="SFTP Config"
 		doc:id="9d255136-3a42-4927-9932-1b57aeb67432">
-		<sftp:connection
-			host="${sftp.host}"
-			username="${sftp.user}"
-			password="${secure::sftp.password}" workingDir="${sftp.working-directory}"
-			connectionTimeoutUnit="MINUTES" responseTimeoutUnit="MINUTES" port="${sftp.port}"/>
+		<sftp:connection host="${sftp.host}"
+			username="${sftp.user}" password="${secure::sftp.password}"
+			workingDir="${sftp.working-directory}"
+			connectionTimeoutUnit="MINUTES" responseTimeoutUnit="MINUTES"
+			port="${sftp.port}">
+			<reconnection>
+				<reconnect-forever frequency="15000" />
+			</reconnection>
+		</sftp:connection>
 	</sftp:config>
 	<email:smtp-config name="Email_SMTP"
 		doc:name="Email SMTP" doc:id="552c4dbb-d38e-48f9-9fb8-98ecb47ac685">
 		<email:smtp-connection host="${smtp.host}"
-			user="${smtp.user}" password="${secure::smtp.password}" port="${smtp.port}">
+			port="${smtp.port}" user="${smtp.user}"
+			password="${secure::smtp.password}">
+			<email:properties>
+				<email:property key="mail.smtp.starttls.enable"
+					value="true" />
+				<email:property key="mail.smtp.starttls.enable"
+					value="true" />
+			</email:properties>
 		</email:smtp-connection>
 	</email:smtp-config>
 	<configuration doc:name="Configuration"
@@ -56,25 +65,4 @@ http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/m
 	<global-property doc:name="Global Property"
 		doc:id="124c66db-ae57-4734-9b84-7dd0f952419c" name="muleEnv"
 		value="local" />
-	<error-handler name="global-configurationError_Handler"
-		doc:id="a263a0f1-ed49-4c6e-9a1d-c0d932f3292b">
-		<on-error-propagate enableNotifications="true"
-			logException="true" doc:name="On Error Propagate"
-			doc:id="4900a8ef-a00e-4c14-9c92-d2c9589e5671" type="ANY">
-			<parse-template doc:name="Parse Template - Error"
-				doc:id="e12b870b-ebb6-465e-b784-5f03ca76fb6a"
-				location="notifications-html/html-error.html" target="emailHtml">
-			</parse-template>
-			<email:send doc:name="Send ERROR Email"
-				doc:id="2df4f6ff-41e2-40c2-b2b2-0995f963c4ff"
-				fromAddress="#[Mule::p('smtp.fromEmail')]"
-				subject="#[Mule::p('smtp.errorSubject') replace &quot;[muleApp]&quot; with upper(Mule::p('muleApplicationName'))]"
-				toAddresses="#[Mule::p('smtp.toEmail') splitBy &quot;,&quot;]"
-				config-ref="Email_SMTP">
-				<email:body contentType='#["text/html"]'>
-					<email:content><![CDATA[#[(vars.emailHtml default error.detailedDescription  ) default ""]]]></email:content>
-				</email:body>
-			</email:send>
-		</on-error-propagate>
-	</error-handler>
 </mule>

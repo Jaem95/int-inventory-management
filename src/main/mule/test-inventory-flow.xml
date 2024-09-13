@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
+	<flow name="testing-flow-execution" doc:id="1f6e65d3-c3e5-432f-b86a-fdbc2d5d3e00" initialState="started">
+		<sftp:listener doc:name="On New or Updated File" doc:id="0b47bbdb-ea4a-4bcb-a293-9caff6c643c0" config-ref="SFTP_Config" directory="${inventory-syncronization.file-directory}" recursive="false" moveToDirectory="${inventory-syncronization.processed-files-path}" renameTo='#[correlationId ++ "-" ++ attributes.fileName]'>
+			<scheduling-strategy>
+				<fixed-frequency frequency="30" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+			<sftp:matcher filenamePattern="*.{CSV,csv}" directories="EXCLUDE"/>
+		</sftp:listener>
+		<json-logger:logger doc:name="START PROCESS TO ANY CSV FILE" doc:id="733dcd2c-4f3c-4b14-b44f-d3807bdefd0b" config-ref="JSON_Logger_Config" message='#["START PROCESS THE FILE:" ++ attributes.fileName]'>
+			<json-logger:content><![CDATA[#[""]]]></json-logger:content>
+		</json-logger:logger>
+		<flow-ref doc:name="processing-flow" doc:id="fd89761e-663e-4c48-9a04-9fe715f701b7" name="processing-flow" />
+		<json-logger:logger doc:name="PROCESS FOR THE INVENTORY FILE WAS FINISHED" doc:id="138a9700-838a-4507-8252-d9bc831ff3ba" config-ref="JSON_Logger_Config" message="PROCESS FOR THE INVENTORY FILE WAS FINISHED" tracePoint="END">
+			<json-logger:content ><![CDATA[#[""]]]></json-logger:content>
+		</json-logger:logger>
+	</flow>
+
+</mule>

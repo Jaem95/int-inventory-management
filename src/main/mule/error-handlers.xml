@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<sub-flow name="error-parse-and-email-sf"
+		doc:id="79e38825-99eb-4250-a5c4-abe0db32de1b">
+		<parse-template doc:name="Parse Template - Error"
+			doc:id="e12b870b-ebb6-465e-b784-5f03ca76fb6a"
+			location="notifications-html/html-error.html" target="emailHtml">
+		</parse-template>
+		<email:send doc:name="Send ERROR Email"
+			doc:id="2df4f6ff-41e2-40c2-b2b2-0995f963c4ff"
+			fromAddress="#[Mule::p('smtp.fromEmail')]"
+			subject="#[Mule::p('smtp.errorSubject') replace &quot;[muleApp]&quot; with upper(Mule::p('muleApplicationName'))]"
+			toAddresses="#[Mule::p('smtp.toEmail') splitBy &quot;,&quot;]" config-ref="Email_SMTP">
+			<email:body contentType='#["text/html"]'>
+				<email:content><![CDATA[#[(vars.emailHtml default error.detailedDescription  ) default ""]]]></email:content>
+			</email:body>
+		</email:send>
+	</sub-flow>
+	<error-handler name="global-configurationError_Handler"
+		doc:id="a263a0f1-ed49-4c6e-9a1d-c0d932f3292b">
+		<on-error-continue enableNotifications="true"
+			logException="false" doc:name="On Error Continue"
+			doc:id="4104e58e-3640-4367-a820-13b958e0ba66"
+			type="EMAIL:SEND,EMAIL:CONNECTIVITY">
+			<flow-ref doc:name="error-parse-and-email-sf" doc:id="0942d8b1-8ca4-41c6-a356-c6d6d35aa177" name="error-parse-and-email-sf" />
+
+		</on-error-continue>
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="4900a8ef-a00e-4c14-9c92-d2c9589e5671" type="ANY">
+	<flow-ref doc:name="error-parse-and-email-sf"
+		doc:id="ae68863c-5423-4bb5-960f-15a4c2eb7af8"
+		name="error-parse-and-email-sf" />
+		</on-error-propagate>
+	</error-handler>
+</mule>
